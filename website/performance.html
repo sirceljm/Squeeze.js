@@ -1,0 +1,130 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Font sizes</title>
+
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<!-- Optional theme -->
+		<link rel="stylesheet" href="css/bootstrap-theme.min.css">
+		<link rel="stylesheet" type="text/css" href="css/jquery-ui.min.css">
+		<link rel="stylesheet" type="text/css" href="css/ion.rangeSlider.css">
+		<link rel="stylesheet" type="text/css" href="css/ion.rangeSlider.skinModern.css">
+		<link rel="stylesheet" type="text/css" href="css/prism.css">
+
+		<link rel="stylesheet" type="text/css" href="css/main.css">
+	</head>
+	<body>
+		<nav class="navbar navbar-default navbar-fixed-top">
+	      <div class="container">
+	        <div class="navbar-header">
+	          Squeeze.js
+	        </div>
+	        <div id="navbar" class="navbar-collapse collapse">
+	          <ul class="nav navbar-nav navbar-right">
+	            <li><a href="index.html">About</a></li>
+	            <li><a href="test_it_out.html">Test it out</a></li>
+	            <li><a href="how_to_use.html">How to use</a></li>
+	            <li><a href="performance.html">Performance</span></a></li>
+	            <li><a href="font_dimensions_generator.html">Font dimensions generator</span></a></li>
+	          </ul>
+	        </div><!--/.nav-collapse -->
+	      </div>
+	    </nav>
+
+	    <div class="container container_flex">
+	    	<div class="container_left">
+	    		<div class="performance_boxes">
+	    			
+	    		</div>
+			</div>
+			<div class="container_right">
+	    		<div class="form-group" style="height: 50px;">
+					<button type="button" id="run" onclick="runPerformanceTest(1000)" class="btn btn-success">Generate 1000 boxes</button>
+				</div>
+				<div class="stats">
+	    			<div class="stats_left">
+	    				<div>Boxes created:</div>
+	    				<br />
+		    			<div>Total time:</div>
+		    			<div>Avg time per box:</div>
+		    			<br />
+		    			<div>Min steps:</div>
+		    			<div>Max steps:</div>
+		    			<div>Avg steps:</div>
+	    			</div>
+	    			<div class="stats_right">
+	    				<div class="info_boxes_created"></div>
+	    				<br />
+	    				<div class="info_total_time"></div>
+		    			<div class="info_avg_time_per_box"></div>
+		    			<br />
+		    			<div class="info_min_steps"></div>
+		    			<div class="info_max_steps"></div>
+		    			<div class="info_avg_steps"></div>
+	    			</div>
+	    		</div>
+		    </div>
+		</div>
+
+		<script src="js/jquery-1.11.2.min.js" type="text/javascript"></script>
+		<script src="js/jquery-ui.min.js" type="text/javascript"></script>
+		<!-- Latest compiled and minified JavaScript -->
+		<script src="js/bootstrap.min.js"></script>
+		<script src="js/prism.js"></script>
+		<script src="js/chance.min.js"></script>
+
+		<script src="fonts/Liberation_dimensions.js" type="text/javascript"></script>
+		<script src="js/Squeeze.js"></script>
+
+		<script>
+			function runPerformanceTest(no_boxes){
+				var min_steps = 100;
+				var max_steps = 0;
+				var total_steps = 0;
+
+				var start_time = new Date().getTime();
+				for(var i = 0; i < no_boxes; i++){
+					var words = chance.sentence();
+					var box_width = chance.natural({min: 100, max: 400});
+					var box_height = chance.natural({min: 50, max: 150});
+
+					var squeeze = new Squeeze(font_sizes, box_height, box_width, words);
+					var response = squeeze.getBestFontSize();
+					//console.log(response);
+
+					if(response.steps < min_steps){
+						min_steps = response.steps;
+					}
+
+					if(response.steps > max_steps){
+						max_steps = response.steps;
+					}
+
+					total_steps += response.steps;
+
+					$('.performance_boxes').append(
+						'<div class="performance_box" style="width:'+box_width+'px; height:'+box_height+'px; font-size:'+response.font_size+'px; line-height:'+response.line_height+'px; ">'+
+						words+
+						'</div>'+
+						'<div></div>'
+					)
+
+					
+				}
+				var stop_time = new Date().getTime();
+				var total_time = stop_time - start_time;
+
+				$('.info_boxes_created').html(no_boxes);
+				$('.info_total_time').html(total_time+" ms");
+				$('.info_avg_time_per_box').html(total_time/no_boxes+" ms");
+
+				$('.info_min_steps').html(min_steps);
+				$('.info_max_steps').html(max_steps);
+				$('.info_avg_steps').html(total_steps/no_boxes);
+
+			}
+		</script>
+	</body>
+	
+</html>

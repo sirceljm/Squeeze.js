@@ -1,0 +1,268 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Font sizes</title>
+
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<!-- Optional theme -->
+		<link rel="stylesheet" href="css/bootstrap-theme.min.css">
+		<link rel="stylesheet" type="text/css" href="css/jquery-ui.min.css">
+		<link rel="stylesheet" type="text/css" href="css/ion.rangeSlider.css">
+		<link rel="stylesheet" type="text/css" href="css/ion.rangeSlider.skinModern.css">
+
+		<link rel="stylesheet" type="text/css" href="css/main.css">
+	</head>
+	<body>
+		<nav class="navbar navbar-default navbar-fixed-top">
+	      <div class="container">
+	        <div class="navbar-header">
+	          Squeeze.js
+	        </div>
+	        <div id="navbar" class="navbar-collapse collapse">
+	          <ul class="nav navbar-nav navbar-right">
+	            <li><a href="index.html">About</a></li>
+	            <li><a href="test_it_out.html">Test it out</a></li>
+	            <li><a href="how_to_use.html">How to use</a></li>
+	            <li><a href="performance.html">Performance</span></a></li>
+	            <li><a href="font_dimensions_generator.html">Font dimensions generator</span></a></li>
+	          </ul>
+	        </div><!--/.nav-collapse -->
+	      </div>
+	    </nav>
+
+	    <div class="container container_flex">
+	    	<div class="container_left">
+	    		<div class="loading">Loading</div>
+	    		<div class="font_table"></div>
+			</div>
+			<div class="container_right">
+				<div class="form-group">
+					<input type="file" id="font_file" name="font_file" />
+					<input type="hidden" id="font_file_contents" />
+				</div>
+
+				<div class="form-group">
+					<select id="font_type_select" class="form-control">
+					  <option value="truetype">TTF</option>
+					  <!--<option value="eot">EOT</option>-->
+					  <option value="woff">WOFF</option>
+					  <!--<option value="svg">SVG</option>-->
+					</select>
+				</div>
+
+				<div class="form-group">
+					<label for="output_filename">Charcters to include</label>
+					<input type="text" class="form-control" id="no_characters" value="200">
+				</div>
+
+				<div class="form-group">
+					<label for="output_filename">Max font size</label>
+					<input type="text" class="form-control" id="max_font_size" value="100">
+				</div>
+
+				<div class="form-group" style="height: 50px;">
+					<button type="button" onclick="renderFontTable($('#no_characters').val(), $('#max_font_size').val(),$('#font_file_contents').val(), $('#font_type_select').val())" id="next_step" class="btn btn-primary pull-right">Load font table</button>
+				</div>
+
+				<div class="form-group">
+					<label for="output_filename">Output filename</label>
+					<input type="text" class="form-control" id="output_filename">
+				</div>
+
+				<div class="form-group">
+					<label for="output_variable_name">Object variable name</label>
+					<input type="text" class="form-control" id="output_variable_name">
+				</div>
+
+				<div class="form-group">
+					<button type="button" id="run" onclick="getFontSizes()" class="btn btn-success pull-right">Get dimensions</button>
+				</div>
+
+				<script>
+				  function handleFileSelect(evt) {
+				  	console.log(evt);
+				    var file = evt.target.files[0]; // FileList object
+					console.log(file);
+				    // Only process image files.
+				    console.log(file.type);
+
+						var reader = new FileReader();
+
+						// Closure to capture the file information.
+						reader.onload = (function(theFile) {
+							return function(e) {
+								var filename = theFile.name;
+
+								var split_filename = filename.split(".");
+								var file_ext = split_filename[split_filename.length-1];
+
+								split_filename.pop();
+								var filename_without_ext = split_filename.join();
+
+								console.log(file_ext);
+
+								$('#font_type_select').children().attr('selected', false);
+								if(file_ext == 'ttf'){
+									$('#font_type_select :nth-child(1)').prop('selected', true);
+								}/*else if(file_ext == 'eot'){
+									$('#font_type_select :nth-child(2)').attr('selected', true);
+								}/*else if(file_ext == 'svg'){
+									$('#font_type_select :nth-child(4)').attr('selected', true);
+								}*/else if(file_ext == 'woff' || file_ext == 'woff2'){
+									$('#font_type_select :nth-child(3)').attr('selected', true);
+								}
+
+								$('#font_file_contents').val(e.target.result);
+								$('#output_filename').val(filename_without_ext+"_Squeeze_dim.js");
+								$('#output_variable_name').val(filename_without_ext+"_dim");
+
+								console.log(e.target.result);
+							};
+						})(file);
+
+						// Read in the image file as a data URL.
+						reader.readAsDataURL(file);
+
+					    console.log(file);				
+				  }
+
+				  document.getElementById('font_file').addEventListener('change', handleFileSelect, false);
+				</script>
+		    </div>
+		</div>
+
+		<script src="js/jquery-1.11.2.min.js" type="text/javascript"></script>
+		<script src="js/jquery-ui.min.js" type="text/javascript"></script>
+		<!-- Latest compiled and minified JavaScript -->
+		<script src="js/bootstrap.min.js"></script>
+
+		<script type="text/javascript">
+			var start_charcode = 33;
+			var stop_charcode = 400;
+			var start_size = 1;
+			var stop_size = 200;
+
+			function pad(num, size){ 
+				return ('000' + num).substr(-size);
+			}
+
+			function setFont(font_data, font_type){
+				console.log(font_type);
+
+				var font_face_css = "";
+
+				if(font_type == "truetype"){
+					font_face_css = "\
+									@font-face {\
+									    font-family: 'new_font';\
+									    src: url('" + font_data + "') format('truetype');\
+									}\
+									";
+				}else if(font_type == "eot"){
+					font_face_css = "\
+									@font-face {\
+									    font-family: 'new_font';\
+									    src: url('" + font_data + "') format('eot');\
+									}\
+									";
+				}else if(font_type == "woff"){
+					console.log(font_data);
+					font_face_css = "\
+									@font-face {\
+									    font-family: 'new_font';\
+									    src: url('" + font_data + "') format(woff);\
+									}\
+									";
+				}else if(font_type == "svg"){
+					font_face_css = "\
+									@font-face {\
+									    font-family: 'new_font';\
+									    src: url('data:application/x-font-ttf;base64," + font_data.slice(13,font_data.length) + "') format(truetype);\
+									}\
+									";
+				}
+
+				console.log(font_face_css);
+
+				var newStyle = document.createElement('style');
+				newStyle.appendChild(document.createTextNode(font_face_css));
+
+				document.head.appendChild(newStyle);				
+			}
+
+			function renderFontTable(no_characters, max_size, font_data, font_type){
+				console.log("renderTable");
+				setFont(font_data, font_type);
+
+				$('.loading').show();
+
+				setTimeout(function(){ 
+					var font_sizes = {}
+
+					$('.font_table').append('<table class="new_font"></table>')
+
+					// RENDER
+					for (var i = 0; i <= max_size; i++) {
+						$('.new_font').append("<tr id='size_"+i+"' style='font-size:"+i+"px;'></tr><tr id='info_char_"+i+"'></tr>");
+
+						for (var j = 0; j < no_characters; j++) {
+							$("#size_"+i).append('<td><span id="char_'+i+'_'+j+'" ">'+String.fromCharCode(j)+'</span></td>')
+							
+						}
+					}
+
+					$('.loading').hide();
+				}, 100);
+				
+			}
+
+			// GET VALUES
+			function getFontSizes(){
+				font_sizes = {};
+				for (var i = start_size; i <= stop_size; i++) {
+					for (var j = start_charcode; j < stop_charcode; j++) {
+						//$("#info_char_"+i).append("<td>"+$("#char_"+i+"_"+j).width()+"</td>")
+
+						var height = $("#char_"+i+"_"+j).height();
+
+							if(height){
+								var index = parseInt(height+pad(i, 3));
+								
+							
+							if(height !== 0){
+								if(!font_sizes[index]){
+									font_sizes[index] = {}
+								}
+
+
+								
+								font_sizes[index][j] = $("#char_"+i+"_"+j)[0].getBoundingClientRect().width;
+
+								if(!font_sizes[index]["max"]){
+									font_sizes[index]["max"] = font_sizes[index][j];
+								}else if(font_sizes[index][j] > font_sizes[index]["max"]){
+									font_sizes[index]["max"] = font_sizes[index][j];
+								}
+							}
+						}
+					}
+				}
+
+				var pom = document.createElement('a');
+				pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent("var "+$('#output_variable_name').val()+" = "+JSON.stringify(font_sizes)+";"));
+				pom.setAttribute('download', $('#output_filename').val());
+
+				pom.style.display = 'none';
+				document.body.appendChild(pom);
+
+				pom.click();
+
+				document.body.removeChild(pom);
+
+				return font_sizes;
+			}
+		</script>
+	</body>
+	
+</html>

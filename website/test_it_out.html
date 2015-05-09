@@ -1,0 +1,186 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Font sizes</title>
+
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<!-- Optional theme -->
+		<link rel="stylesheet" href="css/bootstrap-theme.min.css">
+		<link rel="stylesheet" type="text/css" href="css/jquery-ui.min.css">
+		<link rel="stylesheet" type="text/css" href="css/ion.rangeSlider.css">
+		<link rel="stylesheet" type="text/css" href="css/ion.rangeSlider.skinModern.css">
+
+		<link rel="stylesheet" type="text/css" href="css/main.css">
+	</head>
+	<body>
+		<nav class="navbar navbar-default navbar-fixed-top">
+	      <div class="container">
+	        <div class="navbar-header">
+	          Squeeze.js
+	        </div>
+	        <div id="navbar" class="navbar-collapse collapse">
+	          <ul class="nav navbar-nav navbar-right">
+	            <li><a href="index.html">About</a></li>
+	            <li><a href="test_it_out.html">Test it out</a></li>
+	            <li><a href="how_to_use.html">How to use</a></li>
+	            <li><a href="performance.html">Performance</span></a></li>
+	            <li><a href="font_dimensions_generator.html">Font dimensions generator</span></a></li>
+	          </ul>
+	        </div><!--/.nav-collapse -->
+	      </div>
+	    </nav>
+
+	    <div class="container container_flex">
+	    	<div class="container_left">
+				<div id="box" class="ui-widget-content">
+					<span id="box_text"></span>
+				</div>
+			</div>
+			<div class="container_right">
+				<div class="controls">
+					<div>
+						<button type="button" id="next_step" class="btn btn-primary">Next step</button>
+						<button type="button" id="run" class="btn btn-success pull-right">Get best font size</button>
+					</div>
+					<div class="font_size_slider_wrap">
+		    			<div class="font_size_slider"></div>
+		    		</div>
+		    		<div class="stats">
+		    			<div class="stats_left">
+		    				<div>Box width:</div>
+			    			<div>Box height:</div>
+			    			<br />
+			    			<div>Steps:</div>
+			    			<div>Font size:</div>
+			    			<div>Line height:</div>
+			    			<div>Highest too small size:</div>
+			    			<div>Lowest too big size:</div>
+		    			</div>
+		    			<div class="stats_right">
+		    				<div class="info_box_width"></div>
+			    			<div class="info_box_height"></div>
+			    			<br />
+			    			<div class="info_steps"></div>
+			    			<div class="info_size"></div>
+			    			<div class="info_height"></div>
+			    			<div class="info_htss"></div>
+			    			<div class="info_ltbs"></div>
+		    			</div>
+		    		</div>
+		    		<div>
+		    			<div class="text_label">Text:</div>
+		    			<textarea class="text"></textarea>
+		    		</div>	
+		    	</div>
+		    </div>
+		</div>
+
+		<script src="js/jquery-1.11.2.min.js" type="text/javascript"></script>
+		<script src="js/jquery-ui.min.js" type="text/javascript"></script>
+		<!-- Latest compiled and minified JavaScript -->
+		<script src="js/bootstrap.min.js"></script>
+		<script src="js/ion.rangeSlider.min.js"></script>
+
+		<script src="fonts/Liberation_dimensions.js" type="text/javascript"></script>
+		<script src="js/Squeeze.js" type="text/javascript"></script>
+
+		<script type="text/javascript">
+			$( document ).ready(function() {
+				var obj 		= document.getElementById('box_text');
+				var box_height 	= document.getElementById('box').clientHeight;
+				var box_width 	= document.getElementById('box').clientWidth;
+				
+				var scale_max_font = 140;
+
+				$('.info_box_width').html(box_width+"px");
+				$('.info_box_height').html(box_height+"px");
+				$('.info_steps').html(0);
+
+				var words 		= "Lorem ipsum dolor";
+
+				var squeeze = new Squeeze(font_sizes, box_height, box_width, words);
+				var slider = null;
+
+				var text = "Lorem ipsum dolor";
+				$('.text').html(text);
+				$('#box_text').html(text);
+
+				$('.text').bind('input propertychange', function() {
+					$('#box_text').html(this.value);
+					words = this.value;
+					squeeze = new Squeeze(font_sizes, box_height, box_width, words);
+				});
+
+				$(".font_size_slider").ionRangeSlider({
+				    type: "double",
+				    min: 0,
+				    max: scale_max_font,
+				    grid: true,
+				    force_edges: true,
+				    from_fixed: true,
+    				to_fixed: true,
+    				step: 20,
+    				grid_snap: true
+				});
+
+				var slider = $(".font_size_slider").data("ionRangeSlider");
+
+				//$('#box').jqResize('.jqResize');
+				$("#box").resizable({
+					containment: ".container_left",
+					minHeight: 20,
+				});
+
+				$("#box").on('resize', function(event, ui){
+					obj 		= document.getElementById('box_text');
+					box_height 	= ui.size.height;
+					box_width 	= ui.size.width;
+					words 		= "Lorem ipsum dolor";
+
+					$('.info_box_width').html(box_width+" px");
+					$('.info_box_height').html(box_height+" px");
+
+					squeeze = new Squeeze(font_sizes, box_height, box_width, words);
+				})
+
+				$("#next_step").click(function(){
+					var response = squeeze.tryNextFontSize();
+					console.log(response);
+
+					var font_height = parseInt(response.font_index.substring(0, response.font_index.length-3));
+					var font_size = parseInt(response.font_index.substring(response.font_index.length-3, response.font_index.length));
+
+					$('.info_steps').html(response.steps);
+					$('.info_size').html(font_size);
+					$('.info_height').html(font_height);
+					$('.info_htss').html(response.htss+" px");
+					$('.info_ltbs').html(response.ltbs+" px");
+
+					slider.update({
+					    from: response.htss ? parseInt(response.htss.substring(response.htss.length-3, response.htss.length)) : 0,
+					    to: response.ltbs ? parseInt(response.ltbs.substring(response.ltbs.length-3, response.ltbs.length)) : scale_max_font
+					});
+
+					obj.style.fontSize = font_size+"px";
+					obj.style.lineHeight = font_height+"px";
+				})
+
+				$("#run").click(function(){
+					var response = squeeze.getBestFontSize();
+
+					obj.style.fontSize = response.font_size+"px";
+					obj.style.lineHeight = response.line_height+"px";
+				})
+
+				$("#load_text").click(function(){
+					$("#box_text").html($("#squeeze_text").val());
+					words = $("#squeeze_text").val();
+					squeeze = new Squeeze(font_sizes, box_height, box_width, words);
+				})
+			});
+		</script>
+		
+	</body>
+	
+</html>
