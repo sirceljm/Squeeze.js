@@ -11,6 +11,6 @@ The standard algorithm would set a high font size through CSS and then check if 
  - it doesn't change the font size through CSS during the computation process, but it uses precalculated dimensions for each character
  - it decreases or increases the size in logarithmic way and not linearly which usually requires about eight steps to figure out the correct font size
 
-## [Demo](http://squeeze.s-media.si/test_it_out.html)
-## [Installation and usage](http://squeeze.s-media.si/how_to_use.html)
-## [Font dimensions generator](http://squeeze.s-media.si/font_dimensions_generator.html)
+### [Demo](http://squeeze.s-media.si/test_it_out.html)
+### [Installation and usage](http://squeeze.s-media.si/how_to_use.html)
+### [Font dimensions generator](http://squeeze.s-media.si/font_dimensions_generator.html)
